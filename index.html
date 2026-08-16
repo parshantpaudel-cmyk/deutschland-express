@@ -1701,7 +1701,7 @@ function sampleOptions(correct, pool, n){
 // who knows this password can unlock admin controls. (Previously the first
 // person to open the file on their device could set their own password,
 // which is why a shared copy let someone else become admin — this fixes that.)
-const ADMIN_PASSWORD = 'Prem';
+const FAMILY_PIN = 'Prem';
 let adminUnlocked = false; // resets each time the page loads — only current admin session can edit
 
 function isAdminUnlocked(){ return adminUnlocked; }
@@ -1736,7 +1736,7 @@ function submitAdminPass(){
   const hint = document.getElementById('adminModalHint');
   if(!val){ hint.textContent = 'Bitte Passwort eingeben.'; return; }
 
-  if(val === ADMIN_PASSWORD){
+  if(val === FAMILY_PIN){
     adminUnlocked = true;
     closeAdminModal();
     updateAdminButton();
