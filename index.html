@@ -2189,7 +2189,7 @@ function handleAnswer(btn, chosen, correct){
     if(roundStats[p.id]) roundStats[p.id].correct += 1;
     fb.textContent = namePrefix + 'Richtig! ✔';
     fb.className = 'feedback ok';
-    speak('Richtig!');
+    speak('Richtig! ' + correct + '.');
     recordHistory(currentGame, label, correct, true);
   } else {
     btn.classList.add('wrong');
