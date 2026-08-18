@@ -778,6 +778,15 @@ footer.note{
         <span></span>
         <button class="done-btn" onclick="submitAdminPass()">Bestätigen ✓</button>
       </div>
+      <div id="changePassSection" class="hidden" style="margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
+        <p class="player-hint" style="margin-bottom:6px;">Admin-Passwort ändern:</p>
+        <input type="password" id="newAdminPassInput" placeholder="Neues Passwort…" class="admin-pass-input" onkeydown="if(event.key==='Enter') submitNewAdminPass()">
+        <p class="player-hint" id="changePassHint"></p>
+        <div class="modal-actions">
+          <span></span>
+          <button class="done-btn" onclick="submitNewAdminPass()">Passwort ändern ✓</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1697,14 +1706,46 @@ function sampleOptions(correct, pool, n){
 }
 
 /* ---------------- Admin lock ---------------- */
-// Fixed admin password, same on every device/copy of this file — only someone
-// who knows this password can unlock admin controls. (Previously the first
-// person to open the file on their device could set their own password,
-// which is why a shared copy let someone else become admin — this fixes that.)
-const FAMILY_PIN = 'Prem';
+// The admin password is never stored as plain text in this file. Instead we
+// keep only a SHA-256 hash of it, and that hash lives in Firebase (the same
+// cloud database this game already uses for syncing scores) rather than in
+// the page's own code. Anyone reading this source file cannot recover the
+// real password from the hash. Admins can also change the password from
+// within the Admin panel — that writes a new hash up to Firebase, no code
+// edits needed.
+const DEFAULT_ADMIN_PASSWORD_HASH_SEED = 'Prem'; // used only once, to create the very first hash if none exists yet in Firebase
 let adminUnlocked = false; // resets each time the page loads — only current admin session can edit
+let currentAdminHash = null; // fetched from Firebase
 
 function isAdminUnlocked(){ return adminUnlocked; }
+
+async function sha256Hex(text){
+  const enc = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function getAdminHashRef(){
+  if(!fbReady) return null;
+  return firebase.database().ref('rooms/' + ROOM_ID + '/adminPasswordHash');
+}
+
+async function ensureAdminHashLoaded(){
+  const ref = getAdminHashRef();
+  if(!ref){ return; }
+  try{
+    const snap = await ref.get();
+    if(snap.exists()){
+      currentAdminHash = snap.val();
+    } else {
+      // First time ever — set up the initial password hash in Firebase.
+      currentAdminHash = await sha256Hex(DEFAULT_ADMIN_PASSWORD_HASH_SEED);
+      await ref.set(currentAdminHash);
+    }
+  }catch(e){
+    console.warn('Could not load admin password hash from Firebase:', e);
+  }
+}
 
 function toggleAdmin(){
   const modal = document.getElementById('adminModal');
@@ -1713,6 +1754,9 @@ function toggleAdmin(){
   const hint = document.getElementById('adminModalHint');
   document.getElementById('adminPassInput').value = '';
   hint.textContent = '';
+  document.getElementById('changePassSection').classList.add('hidden');
+  document.getElementById('newAdminPassInput').value = '';
+  document.getElementById('changePassHint').textContent = '';
 
   if(adminUnlocked){
     // lock again
@@ -1724,6 +1768,7 @@ function toggleAdmin(){
   title.textContent = '🔒 Admin entsperren';
   sub.textContent = 'Passwort eingeben, um Einstellungen zu ändern.';
   modal.classList.remove('hidden');
+  ensureAdminHashLoaded();
   setTimeout(()=>document.getElementById('adminPassInput').focus(), 50);
 }
 
@@ -1731,17 +1776,43 @@ function closeAdminModal(){
   document.getElementById('adminModal').classList.add('hidden');
 }
 
-function submitAdminPass(){
+async function submitAdminPass(){
   const val = document.getElementById('adminPassInput').value;
   const hint = document.getElementById('adminModalHint');
   if(!val){ hint.textContent = 'Bitte Passwort eingeben.'; return; }
 
-  if(val === FAMILY_PIN){
+  if(!currentAdminHash){
+    await ensureAdminHashLoaded();
+  }
+  if(!currentAdminHash){
+    hint.textContent = 'Verbindung zum Server fehlt — bitte kurz warten und erneut versuchen.';
+    return;
+  }
+
+  const enteredHash = await sha256Hex(val);
+  if(enteredHash === currentAdminHash){
     adminUnlocked = true;
     closeAdminModal();
     updateAdminButton();
   } else {
     hint.textContent = 'Falsches Passwort.';
+  }
+}
+
+async function submitNewAdminPass(){
+  const val = document.getElementById('newAdminPassInput').value;
+  const hint = document.getElementById('changePassHint');
+  if(!val || val.length < 3){ hint.textContent = 'Neues Passwort muss mindestens 3 Zeichen haben.'; return; }
+  const ref = getAdminHashRef();
+  if(!ref){ hint.textContent = 'Keine Verbindung zum Server.'; return; }
+  try{
+    const newHash = await sha256Hex(val);
+    await ref.set(newHash);
+    currentAdminHash = newHash;
+    hint.textContent = 'Passwort geändert ✓';
+    document.getElementById('newAdminPassInput').value = '';
+  }catch(e){
+    hint.textContent = 'Fehler beim Speichern.';
   }
 }
 
@@ -1754,6 +1825,11 @@ function updateAdminButton(){
   } else {
     btn.textContent = '🔒 Admin';
     btn.classList.remove('unlocked');
+  }
+  const changeSection = document.getElementById('changePassSection');
+  if(changeSection){
+    if(adminUnlocked) changeSection.classList.remove('hidden');
+    else changeSection.classList.add('hidden');
   }
   renderPlayersModal();
   renderSuggestions();
@@ -2189,7 +2265,7 @@ function handleAnswer(btn, chosen, correct){
     if(roundStats[p.id]) roundStats[p.id].correct += 1;
     fb.textContent = namePrefix + 'Richtig! ✔';
     fb.className = 'feedback ok';
-    speak('Richtig! ' + correct + '.');
+    speak('Richtig!');
     recordHistory(currentGame, label, correct, true);
   } else {
     btn.classList.add('wrong');
