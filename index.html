@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Deutschland Express — Komplett A1 Sprachreise</title>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap');
 
@@ -752,6 +750,33 @@ footer.note{
   margin-bottom: 14px;
   text-align:center;
 }
+
+/* ---------- Admin Page ---------- */
+.admin-page{
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 26px;
+  margin-top: 18px;
+  box-shadow: 0 18px 40px -24px rgba(28,37,65,0.4);
+}
+.admin-gate{
+  max-width: 340px;
+  margin: 40px auto;
+  text-align: center;
+}
+.admin-gate .lockemoji{ font-size: 40px; margin-bottom: 8px; }
+.admin-gate h2{ font-family:'Space Grotesk'; margin: 0 0 6px; }
+.admin-gate p{ color:#6b7280; font-size: 13px; margin: 0 0 16px; }
+.admin-section{
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin-top: 18px;
+}
+.admin-section:first-of-type{ border-top:none; margin-top:0; padding-top:0; }
+.admin-section h3{
+  font-family:'Space Grotesk'; font-size: 15px; margin: 0 0 10px;
+}
 </style>
 </head>
 <body>
@@ -761,69 +786,21 @@ footer.note{
   <div class="nav-bar">
     <button class="home-nav-btn" onclick="goToMenu()">🏠 Startseite (Home)</button>
     <span style="font-family:'Space Grotesk'; font-size:13px; font-weight:600; color:var(--ink-soft);">A1 Deutsch Express</span>
-    <button class="admin-lock-btn" id="adminLockBtn" onclick="toggleAdmin()">🔒 Admin</button>
-  </div>
-
-  <!-- ADMIN PASSWORD MODAL -->
-  <div id="adminModal" class="modal-overlay hidden" onclick="if(event.target===this) closeAdminModal()">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 class="modal-title" id="adminModalTitle">🔒 Admin</h3>
-        <button class="modal-close" onclick="closeAdminModal()">✕</button>
-      </div>
-      <p class="modal-sub" id="adminModalSub">Nur Admin kann Einstellungen ändern.</p>
-      <input type="password" id="adminPassInput" placeholder="Passwort…" class="admin-pass-input" onkeydown="if(event.key==='Enter') submitAdminPass()">
-      <p class="player-hint" id="adminModalHint"></p>
-      <div class="modal-actions">
-        <span></span>
-        <button class="done-btn" onclick="submitAdminPass()">Bestätigen ✓</button>
-      </div>
-      <div id="changePassSection" class="hidden" style="margin-top:14px; padding-top:14px; border-top:1px solid var(--line);">
-        <p class="player-hint" style="margin-bottom:6px;">Admin-Passwort ändern:</p>
-        <input type="password" id="newAdminPassInput" placeholder="Neues Passwort…" class="admin-pass-input" onkeydown="if(event.key==='Enter') submitNewAdminPass()">
-        <p class="player-hint" id="changePassHint"></p>
-        <div class="modal-actions">
-          <span></span>
-          <button class="done-btn" onclick="submitNewAdminPass()">Passwort ändern ✓</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="board-frame">
-    <p class="eyebrow">SPRACHREISE · GLEIS A1 KOMPLETT</p>
-    <h1 class="title">Deutschland Express</h1>
-    <p class="subtitle">9 Haltestellen bis zum vollen A1-Zertifikat. Für 1–20 Mitreisende — reihum spielen, gemeinsam lernen.</p>
-    <div class="scoreboard" id="scoreboard"></div>
-    <div style="border-top:1px solid rgba(255,255,255,0.12); padding-top:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-      <span id="liveStatusBadge" style="font-size:13px; font-weight:600; color:#9ca3af;">⚪ Nur lokal (offline)</span>
-      <button class="manage-players-btn" onclick="openPlayersPanel()">👥 Mitspieler verwalten (Players)</button>
-    </div>
-  </div>
-
-  <!-- PLAYERS MODAL -->
-  <div id="playersModal" class="modal-overlay hidden" onclick="if(event.target===this) closePlayersPanel()">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 class="modal-title">👥 Mitspieler</h3>
-        <button class="modal-close" onclick="closePlayersPanel()">✕</button>
-      </div>
-      <p class="modal-sub">Bis zu 6 Spieler — alle spielen reihum an derselben Station.</p>
-      <div id="playersList"></div>
-      <div class="add-player-row">
-        <input type="text" id="newPlayerName" placeholder="Name eingeben…" maxlength="16" onkeydown="if(event.key==='Enter') addPlayerFromInput()">
-        <button class="add-player-btn" id="addPlayerBtn" onclick="addPlayerFromInput()">+ Hinzufügen</button>
-      </div>
-      <p class="player-hint" id="playerHint">Mindestens 1, maximal 20 Spieler.</p>
-      <div class="modal-actions">
-        <button class="reset-scores-btn" onclick="resetAllScores()">Punkte zurücksetzen</button>
-        <button class="done-btn" onclick="closePlayersPanel()">Fertig ✓</button>
-      </div>
-    </div>
+    <button class="admin-lock-btn" id="adminLockBtn" onclick="goToAdminPage()">🔒 Admin</button>
   </div>
 
   <!-- MENU / HOME SCREEN -->
   <div id="menuScreen">
+    <div class="board-frame">
+      <p class="eyebrow">SPRACHREISE · GLEIS A1 KOMPLETT</p>
+      <h1 class="title">Deutschland Express</h1>
+      <p class="subtitle">9 Haltestellen bis zum vollen A1-Zertifikat. Für 1–6 Mitreisende — reihum spielen, gemeinsam lernen.</p>
+      <div class="scoreboard" id="scoreboard"></div>
+      <div style="border-top:1px solid rgba(255,255,255,0.12); padding-top:12px; display:flex; justify-content:flex-end;">
+        <button class="manage-players-btn" onclick="openPlayersPanel()">👥 Mitspieler verwalten (Players)</button>
+      </div>
+    </div>
+
     <div class="departures">
       <div class="dep-head">
         <span>Gleis</span><span>Bild</span><span>Station</span><span>Fragen</span><span>Status</span>
@@ -933,13 +910,12 @@ footer.note{
       <div class="box-list" id="practiceList"></div>
     </div>
     <div class="box suggestion-box" id="suggestionBox">
-      <div class="box-title">🔒 Vorschläge (nur Admin) <button class="box-clear" onclick="clearSuggestions()">leeren</button></div>
-      <p class="box-sub">Jeder kann schreiben, aber nur der Admin kann die Liste sehen.</p>
+      <div class="box-title">💬 Vorschläge <button class="box-clear" onclick="clearSuggestions()">leeren</button></div>
+      <p class="box-sub">Jeder kann schreiben — der Admin liest sie auf der Admin-Seite.</p>
       <div class="add-player-row">
         <input type="text" id="suggestionInput" placeholder="Vorschlag für den Admin…" maxlength="200" onkeydown="if(event.key==='Enter') submitSuggestion()">
         <button class="add-player-btn" onclick="submitSuggestion()">Senden</button>
       </div>
-      <div class="box-list" id="suggestionList"></div>
     </div>
     <div class="box suggestion-box">
       <div class="box-title">🤖 KI-Fragehilfe <button class="box-clear" onclick="clearQuestions()">leeren</button></div>
@@ -949,6 +925,74 @@ footer.note{
         <button class="add-player-btn" onclick="submitQuestion()">Fragen</button>
       </div>
       <div class="box-list" id="questionList"></div>
+    </div>
+  </div>
+
+  <!-- PLAYERS MODAL -->
+  <div id="playersModal" class="modal-overlay hidden" onclick="if(event.target===this) closePlayersPanel()">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title">👥 Mitspieler</h3>
+        <button class="modal-close" onclick="closePlayersPanel()">✕</button>
+      </div>
+      <p class="modal-sub">Bis zu 20 Spieler — alle spielen reihum an derselben Station.</p>
+      <div id="playersList"></div>
+      <div class="add-player-row">
+        <input type="text" id="newPlayerName" placeholder="Name eingeben…" maxlength="16" onkeydown="if(event.key==='Enter') addPlayerFromInput()">
+        <button class="add-player-btn" id="addPlayerBtn" onclick="addPlayerFromInput()">+ Hinzufügen</button>
+      </div>
+      <p class="player-hint" id="playerHint">Mindestens 1, maximal 20 Spieler.</p>
+      <div class="modal-actions">
+        <span></span>
+        <button class="done-btn" onclick="closePlayersPanel()">Fertig ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PAGE (full page, not a popup) -->
+  <div id="adminScreen" class="admin-page hidden">
+    <div class="game-top">
+      <button class="back-btn" onclick="goToMenu()">↩ Zurück zur Übersicht (Return)</button>
+      <span class="progress-pill" id="adminStatusPill">🔒 Gesperrt</span>
+    </div>
+
+    <!-- Gate: shown until correct password entered -->
+    <div id="adminGate" class="admin-gate">
+      <div class="lockemoji">🔒</div>
+      <h2>Admin-Bereich</h2>
+      <p>Bitte Passwort eingeben, um fortzufahren.</p>
+      <input type="password" id="adminPassInput" placeholder="Passwort…" class="admin-pass-input" onkeydown="if(event.key==='Enter') submitAdminPass()">
+      <p class="player-hint" id="adminGateHint" style="text-align:center;"></p>
+      <button class="done-btn" style="margin-top:10px;" onclick="submitAdminPass()">Entsperren ✓</button>
+    </div>
+
+    <!-- Dashboard: shown once unlocked -->
+    <div id="adminDashboard" class="hidden">
+      <div class="admin-section">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <h3>👥 Mitspieler verwalten</h3>
+          <button class="back-btn" onclick="lockAdmin()">🔒 Sperren</button>
+        </div>
+        <div id="adminPlayersList"></div>
+        <div class="add-player-row">
+          <input type="text" id="adminNewPlayerName" placeholder="Name eingeben…" maxlength="16" onkeydown="if(event.key==='Enter') adminAddPlayer()">
+          <button class="add-player-btn" id="adminAddPlayerBtn" onclick="adminAddPlayer()">+ Hinzufügen</button>
+        </div>
+        <p class="player-hint" id="adminPlayerHint">Mindestens 1, maximal 20 Spieler.</p>
+        <button class="reset-scores-btn" onclick="resetAllScores()">Punkte zurücksetzen</button>
+      </div>
+
+      <div class="admin-section">
+        <h3>💬 Vorschläge der Spieler</h3>
+        <div class="box-list" id="adminSuggestionList"></div>
+      </div>
+
+      <div class="admin-section">
+        <h3>🔑 Admin-Passwort ändern</h3>
+        <input type="password" id="adminNewPassInput" placeholder="Neues Passwort…" class="admin-pass-input">
+        <p class="player-hint" id="adminChangePassHint"></p>
+        <button class="done-btn" style="margin-top:8px;" onclick="changeAdminPassword()">Passwort ändern</button>
+      </div>
     </div>
   </div>
 
@@ -967,7 +1011,7 @@ footer.note{
       <div class="prompt-main" id="quizMain"></div>
       <div class="prompt-sub" id="quizSub"></div>
     </div>
-    
+
     <!-- Speaking Practice Mic Button -->
     <div class="mic-area">
       <button class="mic-btn" id="micBtn" onclick="startSpeechRecognition()">🎤 Sprechen (Voice Practice)</button>
@@ -975,7 +1019,7 @@ footer.note{
 
     <div class="choices" id="quizChoices"></div>
     <div class="feedback" id="quizFeedback"></div>
-    
+
     <div class="action-bar-bottom">
       <button class="back-btn" onclick="goToMenu()">🏠 Home</button>
       <button class="next-btn" id="quizNextBtn" onclick="nextQuizQuestion()">Weiter →</button>
@@ -991,7 +1035,7 @@ footer.note{
     <h2 class="game-title">Vokabel-Memory</h2>
     <div class="turn-banner hidden" id="memoryTurnBanner"></div>
     <div class="memory-grid" id="memoryGrid"></div>
-    
+
     <div class="action-bar-bottom">
       <button class="back-btn" onclick="goToMenu()">🏠 Zurück zum Hauptmenü (Home)</button>
     </div>
@@ -1045,7 +1089,6 @@ const ARTIKEL_DATA = [
   {word:"Arzt", art:"der", eng:"doctor"},
   {word:"Kind", art:"das", eng:"child"},
   {word:"Erde", art:"die", eng:"earth"},
-  // Food
   {word:"Brot", art:"das", eng:"bread"},
   {word:"Milch", art:"die", eng:"milk"},
   {word:"Käse", art:"der", eng:"cheese"},
@@ -1061,7 +1104,6 @@ const ARTIKEL_DATA = [
   {word:"Kuchen", art:"der", eng:"cake"},
   {word:"Zucker", art:"der", eng:"sugar"},
   {word:"Salz", art:"das", eng:"salt"},
-  // House
   {word:"Haus", art:"das", eng:"house"},
   {word:"Tür", art:"die", eng:"door"},
   {word:"Fenster", art:"das", eng:"window"},
@@ -1072,7 +1114,6 @@ const ARTIKEL_DATA = [
   {word:"Zimmer", art:"das", eng:"room"},
   {word:"Schrank", art:"der", eng:"closet"},
   {word:"Wand", art:"die", eng:"wall"},
-  // Clothing
   {word:"Hemd", art:"das", eng:"shirt"},
   {word:"Hose", art:"die", eng:"pants"},
   {word:"Rock", art:"der", eng:"skirt"},
@@ -1081,14 +1122,12 @@ const ARTIKEL_DATA = [
   {word:"Schuh", art:"der", eng:"shoe"},
   {word:"Mütze", art:"die", eng:"cap"},
   {word:"Mantel", art:"der", eng:"coat"},
-  // Animals
   {word:"Katze", art:"die", eng:"cat"},
   {word:"Pferd", art:"das", eng:"horse"},
   {word:"Vogel", art:"der", eng:"bird"},
   {word:"Maus", art:"die", eng:"mouse"},
   {word:"Löwe", art:"der", eng:"lion"},
   {word:"Schaf", art:"das", eng:"sheep"},
-  // Body
   {word:"Kopf", art:"der", eng:"head"},
   {word:"Auge", art:"das", eng:"eye"},
   {word:"Hand", art:"die", eng:"hand"},
@@ -1096,12 +1135,10 @@ const ARTIKEL_DATA = [
   {word:"Ohr", art:"das", eng:"ear"},
   {word:"Nase", art:"die", eng:"nose"},
   {word:"Mund", art:"der", eng:"mouth"},
-  // Weather
   {word:"Regen", art:"der", eng:"rain"},
   {word:"Schnee", art:"der", eng:"snow"},
   {word:"Wind", art:"der", eng:"wind"},
   {word:"Wolke", art:"die", eng:"cloud"},
-  // Places
   {word:"Stadt", art:"die", eng:"city"},
   {word:"Straße", art:"die", eng:"street"},
   {word:"Bahnhof", art:"der", eng:"train station"},
@@ -1109,13 +1146,11 @@ const ARTIKEL_DATA = [
   {word:"Park", art:"der", eng:"park"},
   {word:"Geschäft", art:"das", eng:"shop"},
   {word:"Kirche", art:"die", eng:"church"},
-  // Transport
   {word:"Bus", art:"der", eng:"bus"},
   {word:"Zug", art:"der", eng:"train"},
   {word:"Fahrrad", art:"das", eng:"bicycle"},
   {word:"Flugzeug", art:"das", eng:"airplane"},
   {word:"Schiff", art:"das", eng:"ship"},
-  // Time
   {word:"Woche", art:"die", eng:"week"},
   {word:"Monat", art:"der", eng:"month"},
   {word:"Jahr", art:"das", eng:"year"},
@@ -1126,7 +1161,6 @@ const ARTIKEL_DATA = [
 ];
 const ARTIKEL_OPTS = ["der","die","das"];
 
-/* Simple picture dictionary — e.g. "apple" / "ball" style images for vocabulary words */
 const WORD_PICS = {
   "teacher":"🧑‍🏫","woman":"👩","car":"🚗","sun":"☀️","moon":"🌙","book":"📖",
   "dog":"🐶","computer":"💻","lamp":"💡","telephone":"☎️","father":"👨","mother":"👩",
@@ -1333,7 +1367,7 @@ function normalizeSpeech(s){
   return (s||"")
     .toLowerCase()
     .replace(/ä/g,'a').replace(/ö/g,'o').replace(/ü/g,'u').replace(/ß/g,'ss')
-    .replace(/[.,!?"'„"]/g,'')
+    .replace(/[.,!?"'„“]/g,'')
     .trim();
 }
 
@@ -1466,9 +1500,6 @@ function clearPractice(){
 }
 
 /* ---------------- Suggestion box + built-in auto-answer ---------------- */
-/* Note: this runs fully in the browser with no external AI service (a plain
-   downloaded HTML file can't safely hold a private API key), so answers come
-   from a small built-in A1-German knowledge base rather than a live model. */
 const SUGGESTIONS_KEY = 'deutschlandExpress_suggestions_v1';
 
 const AUTO_ANSWER_FAQ = [
@@ -1484,7 +1515,7 @@ const AUTO_ANSWER_FAQ = [
   { keys:['gern','lieber','am liebsten'], a:'"gern" = mag ich; "lieber" = ich bevorzuge das eine gegenüber dem anderen; "am liebsten" = die absolute Nummer 1.' },
   { keys:['präposition','preposition','in an auf','aus','nach'], a:'Wechselpräpositionen (in, an, auf...) nehmen Akkusativ bei Bewegung (wohin?) und Dativ bei Ort (wo?). "aus" = Herkunft, "nach" = Richtung/Zielort.' },
   { keys:['mikrofon','mic','sprechen','stimme','aussprache','pronunciation'], a:'Für die Spracherkennung: Mikrofon erlauben, deutlich auf Deutsch sprechen, in ruhiger Umgebung. Chrome/Edge werden empfohlen. Die Seite muss über https:// oder localhost geöffnet sein.' },
-  { keys:['admin','passwort','sperr','password'], a:'Nur der Admin (mit Passwort) kann Spieler hinzufügen, entfernen oder Punkte zurücksetzen. Auf 🔒 Admin oben klicken zum Entsperren.' },
+  { keys:['admin','passwort','sperr','password'], a:'Nur der Admin (mit Passwort) kann auf der Admin-Seite Spieler hinzufügen, entfernen oder Punkte zurücksetzen. Auf 🔒 Admin oben klicken zum Entsperren.' },
   { keys:['dativ'], a:'Der Dativ ist beim indirekten Objekt (wem?). Artikel ändern sich: der→dem, die→der, das→dem, die (Pl)→den(+n).' },
   { keys:['plural','mehrzahl'], a:'Der Plural hat keine feste Regel — meist -e, -er, -(e)n, -s, oder keine Endung. Am besten mit dem Artikel "die" (Plural-Form) mitlernen.' },
   { keys:['sie du','du oder sie','siezen','duzen','höflich'], a:'"du" ist informell (Familie, Freunde, Kinder). "Sie" ist die höfliche Form für Fremde, im Beruf oder mit älteren Personen.' },
@@ -1516,7 +1547,6 @@ function saveSuggestions(list){
 }
 let suggestions = loadSuggestions();
 
-// Suggestions box: anyone can submit, but only the unlocked admin can see the list.
 function submitSuggestion(){
   const input = document.getElementById('suggestionInput');
   const text = input.value.trim();
@@ -1529,6 +1559,11 @@ function submitSuggestion(){
   saveSuggestions(suggestions);
   input.value = '';
   renderSuggestions();
+  const hintEl = document.getElementById('suggestionInput');
+  if(hintEl){
+    hintEl.placeholder = 'Danke! Vorschlag gesendet ✓';
+    setTimeout(()=>{ hintEl.placeholder = 'Vorschlag für den Admin…'; }, 2000);
+  }
 }
 
 function clearSuggestions(){
@@ -1538,12 +1573,13 @@ function clearSuggestions(){
 }
 
 function renderSuggestions(){
-  const wrap = document.getElementById('suggestionList');
+  // Suggestions are only ever displayed on the admin page now.
+  renderAdminSuggestions();
+}
+
+function renderAdminSuggestions(){
+  const wrap = document.getElementById('adminSuggestionList');
   if(!wrap) return;
-  if(!isAdminUnlocked()){
-    wrap.innerHTML = '<p class="box-empty">🔒 Nur der Admin kann diese Liste sehen. Oben entsperren.</p>';
-    return;
-  }
   if(!suggestions.length){
     wrap.innerHTML = '<p class="box-empty">Noch keine Vorschläge.</p>';
     return;
@@ -1555,7 +1591,6 @@ function renderSuggestions(){
   }).join('');
 }
 
-// AI question-help box: public, always visible, answers difficult A1 grammar questions.
 const QUESTIONS_KEY = 'deutschlandExpress_questions_v1';
 function loadQuestions(){
   try{
@@ -1605,8 +1640,8 @@ function renderQuestions(){
 
 function kindTitle(kind){
   return {
-    artikel:"Artikel", possessiv:"Possessiv", wfrage:"W-Frage", 
-    alphabet:"Alphabet", zahlen:"Zahlen", verben:"Verben", 
+    artikel:"Artikel", possessiv:"Possessiv", wfrage:"W-Frage",
+    alphabet:"Alphabet", zahlen:"Zahlen", verben:"Verben",
     akkusativ:"Akkusativ", satzbau:"Satzbau"
   }[kind] || kind;
 }
@@ -1679,6 +1714,7 @@ function launchPracticeItem(kind, encodedLabel){
   document.getElementById('menuSideBoxes').classList.add('hidden');
   document.getElementById('memoryScreen').classList.add('hidden');
   document.getElementById('endScreen').classList.add('hidden');
+  document.getElementById('adminScreen').classList.add('hidden');
   document.getElementById('quizScreen').classList.remove('hidden');
   document.getElementById('practiceBanner').classList.remove('hidden');
   document.getElementById('quizTurnBanner').classList.add('hidden');
@@ -1705,115 +1741,99 @@ function sampleOptions(correct, pool, n){
   return shuffle([correct, ...others]);
 }
 
-/* ---------------- Admin lock ---------------- */
-// The admin password is never stored as plain text in this file. Instead we
-// keep only a SHA-256 hash of it, and that hash lives in Firebase (the same
-// cloud database this game already uses for syncing scores) rather than in
-// the page's own code. Anyone reading this source file cannot recover the
-// real password from the hash. Admins can also change the password from
-// within the Admin panel — that writes a new hash up to Firebase, no code
-// edits needed.
-const DEFAULT_ADMIN_PASSWORD_HASH_SEED = 'Prem'; // used only once, to create the very first hash if none exists yet in Firebase
-let adminUnlocked = false; // resets each time the page loads — only current admin session can edit
-let currentAdminHash = null; // fetched from Firebase
+/* ---------------- Admin lock & Admin Page ---------------- */
+const ADMIN_PASS_KEY = 'deutschlandExpress_adminPass_v1';
+const DEFAULT_ADMIN_PASS = 'Prem';
+
+function loadAdminPass(){
+  try{
+    const stored = localStorage.getItem(ADMIN_PASS_KEY);
+    return stored || DEFAULT_ADMIN_PASS;
+  } catch(e){ return DEFAULT_ADMIN_PASS; }
+}
+function saveAdminPass(pass){
+  try{ localStorage.setItem(ADMIN_PASS_KEY, pass); } catch(e){}
+}
+let currentAdminPass = loadAdminPass();
+
+let adminUnlocked = false; // resets on page reload — must re-enter password each visit
 
 function isAdminUnlocked(){ return adminUnlocked; }
 
-async function sha256Hex(text){
-  const enc = new TextEncoder().encode(text);
-  const digest = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+// Navigate to the dedicated Admin page (replaces the old popup modal).
+function goToAdminPage(){
+  document.getElementById('menuScreen').classList.add('hidden');
+  document.getElementById('menuSideBoxes').classList.add('hidden');
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('memoryScreen').classList.add('hidden');
+  document.getElementById('endScreen').classList.add('hidden');
+  document.getElementById('adminScreen').classList.remove('hidden');
+  currentGame = null;
 
-function getAdminHashRef(){
-  if(!fbReady) return null;
-  return firebase.database().ref('rooms/' + ROOM_ID + '/adminPasswordHash');
-}
-
-async function ensureAdminHashLoaded(){
-  const ref = getAdminHashRef();
-  if(!ref){ return; }
-  try{
-    const snap = await ref.get();
-    if(snap.exists()){
-      currentAdminHash = snap.val();
-    } else {
-      // First time ever — set up the initial password hash in Firebase.
-      currentAdminHash = await sha256Hex(DEFAULT_ADMIN_PASSWORD_HASH_SEED);
-      await ref.set(currentAdminHash);
-    }
-  }catch(e){
-    console.warn('Could not load admin password hash from Firebase:', e);
-  }
-}
-
-function toggleAdmin(){
-  const modal = document.getElementById('adminModal');
-  const title = document.getElementById('adminModalTitle');
-  const sub = document.getElementById('adminModalSub');
-  const hint = document.getElementById('adminModalHint');
   document.getElementById('adminPassInput').value = '';
-  hint.textContent = '';
-  document.getElementById('changePassSection').classList.add('hidden');
-  document.getElementById('newAdminPassInput').value = '';
-  document.getElementById('changePassHint').textContent = '';
-
-  if(adminUnlocked){
-    // lock again
-    adminUnlocked = false;
-    updateAdminButton();
-    return;
+  document.getElementById('adminGateHint').textContent = '';
+  renderAdminGateState();
+  if(!adminUnlocked){
+    setTimeout(()=>document.getElementById('adminPassInput').focus(), 50);
   }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try{ history.replaceState(null, '', '#admin'); } catch(e){}
+}
 
-  title.textContent = '🔒 Admin entsperren';
-  sub.textContent = 'Passwort eingeben, um Einstellungen zu ändern.';
-  modal.classList.remove('hidden');
-  ensureAdminHashLoaded();
+function renderAdminGateState(){
+  const pill = document.getElementById('adminStatusPill');
+  const gate = document.getElementById('adminGate');
+  const dash = document.getElementById('adminDashboard');
+  if(adminUnlocked){
+    pill.textContent = '🔓 Entsperrt';
+    gate.classList.add('hidden');
+    dash.classList.remove('hidden');
+    renderAdminDashboard();
+  } else {
+    pill.textContent = '🔒 Gesperrt';
+    gate.classList.remove('hidden');
+    dash.classList.add('hidden');
+  }
+  updateAdminButton();
+}
+
+function submitAdminPass(){
+  const val = document.getElementById('adminPassInput').value;
+  const hint = document.getElementById('adminGateHint');
+  if(!val){ hint.textContent = 'Bitte Passwort eingeben.'; return; }
+
+  if(val === currentAdminPass){
+    adminUnlocked = true;
+    renderAdminGateState();
+  } else {
+    hint.textContent = 'Falsches Passwort.';
+    hint.style.color = 'var(--coral)';
+  }
+}
+
+function lockAdmin(){
+  adminUnlocked = false;
+  document.getElementById('adminPassInput').value = '';
+  document.getElementById('adminGateHint').textContent = '';
+  renderAdminGateState();
   setTimeout(()=>document.getElementById('adminPassInput').focus(), 50);
 }
 
-function closeAdminModal(){
-  document.getElementById('adminModal').classList.add('hidden');
-}
-
-async function submitAdminPass(){
-  const val = document.getElementById('adminPassInput').value;
-  const hint = document.getElementById('adminModalHint');
-  if(!val){ hint.textContent = 'Bitte Passwort eingeben.'; return; }
-
-  if(!currentAdminHash){
-    await ensureAdminHashLoaded();
-  }
-  if(!currentAdminHash){
-    hint.textContent = 'Verbindung zum Server fehlt — bitte kurz warten und erneut versuchen.';
+function changeAdminPassword(){
+  if(!isAdminUnlocked()) return;
+  const input = document.getElementById('adminNewPassInput');
+  const hint = document.getElementById('adminChangePassHint');
+  const val = input.value.trim();
+  if(!val || val.length < 3){
+    hint.textContent = 'Mindestens 3 Zeichen.';
+    hint.style.color = 'var(--coral)';
     return;
   }
-
-  const enteredHash = await sha256Hex(val);
-  if(enteredHash === currentAdminHash){
-    adminUnlocked = true;
-    closeAdminModal();
-    updateAdminButton();
-  } else {
-    hint.textContent = 'Falsches Passwort.';
-  }
-}
-
-async function submitNewAdminPass(){
-  const val = document.getElementById('newAdminPassInput').value;
-  const hint = document.getElementById('changePassHint');
-  if(!val || val.length < 3){ hint.textContent = 'Neues Passwort muss mindestens 3 Zeichen haben.'; return; }
-  const ref = getAdminHashRef();
-  if(!ref){ hint.textContent = 'Keine Verbindung zum Server.'; return; }
-  try{
-    const newHash = await sha256Hex(val);
-    await ref.set(newHash);
-    currentAdminHash = newHash;
-    hint.textContent = 'Passwort geändert ✓';
-    document.getElementById('newAdminPassInput').value = '';
-  }catch(e){
-    hint.textContent = 'Fehler beim Speichern.';
-  }
+  currentAdminPass = val;
+  saveAdminPass(val);
+  input.value = '';
+  hint.textContent = 'Passwort geändert ✓';
+  hint.style.color = 'var(--forest)';
 }
 
 function updateAdminButton(){
@@ -1826,93 +1846,44 @@ function updateAdminButton(){
     btn.textContent = '🔒 Admin';
     btn.classList.remove('unlocked');
   }
-  const changeSection = document.getElementById('changePassSection');
-  if(changeSection){
-    if(adminUnlocked) changeSection.classList.remove('hidden');
-    else changeSection.classList.add('hidden');
-  }
-  renderPlayersModal();
-  renderSuggestions();
 }
 
-/* ---------------- Live multiplayer sync (Firebase) ---------------- */
-const firebaseConfig = {
-  apiKey: "AIzaSyAZfl63LwvfLbc-N6csA_nVj41k2mM90eo",
-  authDomain: "german-family.firebaseapp.com",
-  databaseURL: "https://greman-7d76a-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "german-family",
-  storageBucket: "german-family.firebasestorage.app",
-  messagingSenderId: "649684650892",
-  appId: "1:649684650892:web:525a1ceb05ed129e7fe4a9"
-};
-const ROOM_ID = 'family1'; // everyone using this game shares this room
-let fbRef = null;
-let fbReady = false;
-let suppressRemoteEcho = false;
+function renderAdminDashboard(){
+  renderAdminPlayersList();
+  renderAdminSuggestions();
+}
 
-function initFirebaseSync(){
-  try{
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    fbRef = db.ref('rooms/' + ROOM_ID);
-    fbReady = true;
-    setLiveStatus('connecting');
-
-    // Listen for remote changes (from other devices/players)
-    fbRef.on('value', function(snapshot){
-      const data = snapshot.val();
-      if(!data){
-        // nothing in the cloud yet — push our current local state up
-        pushStateToFirebase();
-        setLiveStatus('online');
-        return;
-      }
-      if(suppressRemoteEcho){ suppressRemoteEcho = false; setLiveStatus('online'); return; }
-      if(Array.isArray(data.players) && data.players.length){
-        players = data.players;
-      }
-      if(typeof data.activePlayerIndex === 'number'){
-        activePlayerIndex = data.activePlayerIndex;
-      }
-      try{ localStorage.setItem(PLAYERS_KEY, JSON.stringify(players)); }catch(e){}
-      renderScoreboard();
-      if(document.getElementById('playersModal') && !document.getElementById('playersModal').classList.contains('hidden')){
-        renderPlayersModal();
-      }
-      updateTurnBanners();
-      setLiveStatus('online');
-    });
-
-    db.ref('.info/connected').on('value', function(snap){
-      if(snap.val() === false) setLiveStatus('offline');
-    });
-  } catch(e){
-    fbReady = false;
-    setLiveStatus('offline');
-    console.warn('Firebase sync unavailable, using local-only mode:', e);
+function renderAdminPlayersList(){
+  const wrap = document.getElementById('adminPlayersList');
+  if(!wrap) return;
+  wrap.innerHTML = players.map(p=>{
+    return '<div class="player-row">'
+      + '<div class="avatar">'+initials(p.name)+'</div>'
+      + '<input type="text" value="'+p.name.replace(/"/g,'&quot;')+'" maxlength="16" onchange="renamePlayer('+p.id+', this.value)">'
+      + '<span class="pr-score">'+p.score+' Pkt</span>'
+      + '<button class="pr-remove" onclick="removePlayer('+p.id+')" '+(players.length<=1?'disabled style="opacity:.3;cursor:not-allowed;"':'')+'>✕</button>'
+      + '</div>';
+  }).join('');
+  const addBtn = document.getElementById('adminAddPlayerBtn');
+  if(addBtn) addBtn.disabled = players.length >= 20;
+  const hint = document.getElementById('adminPlayerHint');
+  if(hint){
+    hint.style.color = '#9ca3af';
+    hint.textContent = players.length >= 20 ? 'Maximal 20 Spieler erreicht.' : 'Mindestens 1, maximal 20 Spieler.';
   }
 }
 
-function pushStateToFirebase(){
-  if(!fbReady || !fbRef) return;
-  suppressRemoteEcho = true;
-  fbRef.set({ players: players, activePlayerIndex: activePlayerIndex, updatedAt: Date.now() })
-    .catch(function(e){ console.warn('Firebase write failed:', e); });
-}
-
-function setLiveStatus(status){
-  const el = document.getElementById('liveStatusBadge');
-  if(!el) return;
-  if(status === 'online'){
-    el.textContent = '🟢 Live verbunden';
-    el.style.color = '#3fae5e';
-  } else if(status === 'connecting'){
-    el.textContent = '🟡 Verbinde…';
-    el.style.color = '#d8a44e';
-  } else {
-    el.textContent = '⚪ Nur lokal (offline)';
-    el.style.color = '#9ca3af';
-  }
+function adminAddPlayer(){
+  if(!isAdminUnlocked()) return;
+  const input = document.getElementById('adminNewPlayerName');
+  const name = input.value.trim();
+  if(!name) return;
+  if(players.length >= 20) return;
+  players.push({ id: nextPlayerId(), name, score:0, streak:0, best:0, correct:0, wrong:0 });
+  input.value = '';
+  savePlayers();
+  renderAdminPlayersList();
+  renderScoreboard();
 }
 
 /* ---------------- Multiplayer: players engine ---------------- */
@@ -1939,7 +1910,6 @@ function loadPlayers(){
 }
 function savePlayers(){
   try{ localStorage.setItem(PLAYERS_KEY, JSON.stringify(players)); } catch(e){}
-  pushStateToFirebase();
 }
 players = loadPlayers();
 
@@ -1947,6 +1917,7 @@ function nextPlayerId(){
   return players.reduce((m,p)=>Math.max(m,p.id),0) + 1;
 }
 
+// Anyone can add a player from the Players modal — no admin needed.
 function addPlayerFromInput(){
   const input = document.getElementById('newPlayerName');
   const name = input.value.trim();
@@ -1969,7 +1940,7 @@ function removePlayer(id){
   players = players.filter(p=>p.id !== id);
   if(activePlayerIndex >= players.length) activePlayerIndex = 0;
   savePlayers();
-  renderPlayersModal();
+  renderAdminPlayersList();
   renderScoreboard();
   updateTurnBanners();
 }
@@ -1988,7 +1959,7 @@ function resetAllScores(){
   players.forEach(p=>{ p.score=0; p.streak=0; p.best=0; p.correct=0; p.wrong=0; });
   activePlayerIndex = 0;
   savePlayers();
-  renderPlayersModal();
+  renderAdminPlayersList();
   renderScoreboard();
 }
 
@@ -2001,25 +1972,19 @@ function closePlayersPanel(){
 }
 
 function renderPlayersModal(){
-  const admin = isAdminUnlocked();
   const wrap = document.getElementById('playersList');
   wrap.innerHTML = players.map(p=>{
     return '<div class="player-row">'
       + '<div class="avatar">'+initials(p.name)+'</div>'
-      + '<input type="text" value="'+p.name.replace(/"/g,'&quot;')+'" maxlength="16" '
-      +   (admin ? 'onchange="renamePlayer('+p.id+', this.value)"' : 'disabled')+'>'
+      + '<input type="text" value="'+p.name.replace(/"/g,'&quot;')+'" maxlength="16" onchange="renamePlayer('+p.id+', this.value)">'
       + '<span class="pr-score">'+p.score+' Pkt</span>'
-      + '<button class="pr-remove" onclick="removePlayer('+p.id+')" '+((!admin || players.length<=1)?'disabled style="opacity:.3;cursor:not-allowed;"':'')+'>✕</button>'
+      + '<button class="pr-remove" onclick="removePlayer('+p.id+')" '+((!isAdminUnlocked() || players.length<=1)?'disabled style="opacity:.3;cursor:not-allowed;"':'')+'>✕</button>'
       + '</div>';
   }).join('');
-  document.getElementById('addPlayerBtn').disabled = players.length >= 20 || !admin;
+  document.getElementById('addPlayerBtn').disabled = players.length >= 20;
   const hint = document.getElementById('playerHint');
   hint.style.color = '#9ca3af';
-  if(!admin){
-    hint.textContent = '🔒 Nur Admin kann Spieler bearbeiten. Oben rechts entsperren.';
-  } else {
-    hint.textContent = players.length >= 20 ? 'Maximal 20 Spieler erreicht.' : 'Mindestens 1, maximal 20 Spieler.';
-  }
+  hint.textContent = players.length >= 20 ? 'Maximal 20 Spieler erreicht.' : 'Mindestens 1, maximal 20 Spieler. Zum Entfernen: Admin-Seite.';
 }
 
 function renderScoreboard(){
@@ -2054,7 +2019,6 @@ function nextTurn(){
   }
   renderScoreboard();
   updateTurnBanners();
-  pushStateToFirebase();
 }
 
 function updateTurnBanners(){
@@ -2085,12 +2049,14 @@ function goToMenu(){
   document.getElementById('quizScreen').classList.add('hidden');
   document.getElementById('memoryScreen').classList.add('hidden');
   document.getElementById('endScreen').classList.add('hidden');
+  document.getElementById('adminScreen').classList.add('hidden');
   currentGame = null;
   practiceMode = false;
   renderHistoryBox();
   renderPracticeBox();
   renderScoreboard();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  try{ if(location.hash === '#admin') history.replaceState(null, '', location.pathname + location.search); } catch(e){}
 }
 
 document.querySelectorAll('.dep-row').forEach(row=>{
@@ -2109,6 +2075,7 @@ function startGame(g){
   document.getElementById('menuScreen').classList.add('hidden');
   document.getElementById('menuSideBoxes').classList.add('hidden');
   document.getElementById('endScreen').classList.add('hidden');
+  document.getElementById('adminScreen').classList.add('hidden');
   document.getElementById('practiceBanner').classList.add('hidden');
   updateTurnBanners();
   if(g === 'memory'){
@@ -2406,7 +2373,6 @@ function flipMemoryCard(el){
         if(memoryMatched === MEMORY_DATA.length){
           setTimeout(()=> showEnd(MEMORY_DATA.length, MEMORY_DATA.length), 500);
         }
-        // match found: same player keeps their turn
       }, 450);
     } else {
       p.streak = 0; updateStats();
@@ -2414,19 +2380,28 @@ function flipMemoryCard(el){
         a.classList.remove('flipped'); b.classList.remove('flipped');
         memoryFlipped = [];
         memoryLock = false;
-        nextTurn(); // no match: turn passes to next player
+        nextTurn();
       }, 750);
     }
   }
 }
 
+/* ---------------- Startup ---------------- */
 updateStats();
 renderHistoryBox();
 renderPracticeBox();
-renderSuggestions();
 renderQuestions();
 updateAdminButton();
-initFirebaseSync();
+
+// Deep link: opening the page with #admin in the URL jumps straight to the admin gate.
+if(location.hash === '#admin'){
+  goToAdminPage();
+}
+window.addEventListener('hashchange', ()=>{
+  if(location.hash === '#admin' && document.getElementById('adminScreen').classList.contains('hidden')){
+    goToAdminPage();
+  }
+});
 </script>
 </body>
 </html>
